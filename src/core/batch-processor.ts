@@ -7,7 +7,7 @@ import chalk from 'chalk';
 export interface BatchProcessorOptions {
     basePath: string;
     outputDir: string;
-    textureConfigPath: string; // Path to textures.json
+    textureConfigPath: string; // Path to texture-optimize-pro.json
     patterns?: string[];
     exclude?: string[];
     concurrency?: number;
@@ -37,7 +37,7 @@ export class BatchProcessor {
      * Matches texture filenames to configuration entries
      */
     async processAll(): Promise<OptimizationResult[]> {
-        // Load texture configuration from textures.json
+        // Load texture configuration from texture-optimize-pro.json
         console.log(chalk.blue(`📋 Loading texture configuration from: ${this.options.textureConfigPath}`));
         this.configManager = await TextureConfigManager.loadFromFile(this.options.textureConfigPath);
 
@@ -71,7 +71,7 @@ export class BatchProcessor {
 
     /**
      * Process a single texture based on its name configuration
-     * The texture name is matched against entries in textures.json
+     * The texture name is matched against entries in texture-optimize-pro.json
      */
     private async processTexture(inputPath: string): Promise<OptimizationResult> {
         // Get settings for this specific texture by matching its filename

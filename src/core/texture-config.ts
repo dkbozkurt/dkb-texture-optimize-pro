@@ -9,7 +9,6 @@ const textureSettingsSchema = z.object({
     quality: z.number().min(1).max(100).optional(),
     powerOf2: z.boolean().optional(),
     maintainAspectRatio: z.boolean().optional(),
-    encoding: z.enum(['base64', 'base122', 'none']).optional()
 });
 
 const textureEntrySchema = z.object({
@@ -20,7 +19,6 @@ const textureEntrySchema = z.object({
     quality: z.number().min(1).max(100).optional(),
     powerOf2: z.boolean().optional(),
     maintainAspectRatio: z.boolean().optional(),
-    encoding: z.enum(['base64', 'base122', 'none']).optional()
 });
 
 const textureConfigSchema = z.object({
@@ -34,7 +32,7 @@ export type TextureConfig = z.infer<typeof textureConfigSchema>;
 
 /**
  * Manages per-texture configuration based on texture names
- * Loads settings from textures.json and matches by filename
+ * Loads settings from texture-optimize-pro.json and matches by filename
  */
 export class TextureConfigManager {
     private config: TextureConfig;
@@ -93,7 +91,6 @@ export class TextureConfigManager {
             quality: textureEntry.quality ?? this.config.defaultSettings.quality,
             powerOf2: textureEntry.powerOf2 ?? this.config.defaultSettings.powerOf2,
             maintainAspectRatio: textureEntry.maintainAspectRatio ?? this.config.defaultSettings.maintainAspectRatio,
-            encoding: textureEntry.encoding ?? this.config.defaultSettings.encoding
         };
     }
 

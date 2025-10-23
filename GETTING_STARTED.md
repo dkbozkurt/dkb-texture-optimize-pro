@@ -34,11 +34,11 @@ Run the init command to create a sample configuration file:
 npx texture-optimizer init
 ```
 
-This creates `textures.json` in your project root.
+This creates `texture-optimize-pro.json` in your project root.
 
 ## Step 3: Configure Your Textures
 
-Edit `textures.json` to match your texture files:
+Edit `texture-optimize-pro.json` to match your texture files:
 
 ```json
 {
@@ -76,6 +76,7 @@ Edit `textures.json` to match your texture files:
 ### Understanding the Configuration
 
 **defaultSettings:**
+
 - Applied to all textures not listed in the `textures` array
 - Applied to textures with `useDefault: true`
 
@@ -91,16 +92,19 @@ Edit `textures.json` to match your texture files:
 ```
 
 **Name Matching:**
+
 - The `name` field matches the filename **without extension**
 - Example: `"name": "player-sprite"` matches `player-sprite.png`, `player-sprite.jpg`, etc.
 - Works with nested directories: searches all subdirectories
 
 **maxSize Options:**
+
 - 64, 128, 256, 512, 1024, 2048, 4096
 - With `powerOf2: true`, resizes to nearest lower power-of-2
 - With `powerOf2: false`, resizes proportionally
 
 **Format Options:**
+
 - `"png"` - Best for transparency, UI elements
 - `"jpg"` - Best for photos, backgrounds without transparency
 - `"webp"` - Best overall compression for modern browsers
@@ -120,11 +124,11 @@ npx texture-optimizer build \
 ```
 🎨 Texture Optimizer for HTML5 Games
 
-Config: /path/to/textures.json
+Config: /path/to/texture-optimize-pro.json
 Input:  /path/to/src/assets/textures
 Output: /path/to/dist/textures
 
-📋 Loading texture configuration from: /path/to/textures.json
+📋 Loading texture configuration from: /path/to/texture-optimize-pro.json
    Found 3 configured textures in config
 📁 Found 5 texture files to process
 
@@ -316,6 +320,7 @@ Bad:
 ### 3. Power-of-2 for WebGL
 
 Always use `powerOf2: true` for:
+
 - ThreeJS textures (required for mipmapping)
 - PixiJS textures (better performance)
 - Any WebGL rendering
@@ -330,6 +335,7 @@ Always use `powerOf2: true` for:
 ### 5. Test Your Settings
 
 After optimization, load your game and verify:
+
 - Textures look good visually
 - No performance issues
 - File sizes are acceptable
@@ -390,7 +396,7 @@ Config: "name": "player-sprite"       ✗ Won't match
 ## Next Steps
 
 1. ✅ Install the library
-2. ✅ Create `textures.json` configuration
+2. ✅ Create `texture-optimize-pro.json` configuration
 3. ✅ Configure your textures
 4. ✅ Run the optimizer
 5. ✅ Integrate with build process

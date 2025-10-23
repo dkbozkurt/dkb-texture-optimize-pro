@@ -20,8 +20,8 @@ program
 
 program
     .command('build')
-    .description('Process and optimize textures based on textures.json configuration')
-    .option('-c, --config <path>', 'Path to textures.json config file', 'textures.json')
+    .description('Process and optimize textures based on texture-optimize-pro.json configuration')
+    .option('-c, --config <path>', 'Path to texture-optimize-pro.json config file', 'texture-optimize-pro.json')
     .option('-b, --base-path <path>', 'Base path for input textures', 'src/assets/textures')
     .option('-o, --output <path>', 'Output directory', 'dist/textures')
     .option('--concurrency <number>', 'Number of concurrent operations', '10')
@@ -82,10 +82,10 @@ program
 
 program
     .command('init')
-    .description('Create a sample textures.json configuration file')
+    .description('Create a sample texture-optimize-pro.json configuration file')
     .argument('[directory]', 'Target directory', '.')
     .action(async (directory) => {
-        const configPath = path.join(directory, 'textures.json');
+        const configPath = path.join(directory, 'texture-optimize-pro.json');
 
         // Check if file already exists
         try {
@@ -103,8 +103,7 @@ program
                 format: 'png',
                 quality: 80,
                 powerOf2: true,
-                maintainAspectRatio: true,
-                encoding: 'none'
+                maintainAspectRatio: true
             },
             textures: [
                 {
@@ -152,7 +151,7 @@ program
         console.log(chalk.gray('   - Use maxSize 1024 for general web games'));
         console.log(chalk.gray('   - WebP format provides best compression for most cases'));
         console.log(chalk.blue('\n🚀 Next steps:'));
-        console.log(chalk.gray('   1. Edit textures.json with your texture names and settings'));
+        console.log(chalk.gray('   1. Edit texture-optimize-pro.json with your texture names and settings'));
         console.log(chalk.gray('   2. Run: texture-optimizer build'));
     });
 

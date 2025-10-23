@@ -12,7 +12,6 @@ export interface OptimizationResult {
     reductionPercent: number;
     settings: TextureSettings;
     processingTime: number;
-    encoded?: string;
     error?: string;
 }
 
@@ -45,7 +44,7 @@ export class TextureOptimizer {
             const targetDims = this.calculateTargetDimensions(
                 originalSize.width,
                 originalSize.height,
-                Number(this.settings.maxSize)
+                this.settings.maxSize!
             );
 
             // Create Sharp processing pipeline
@@ -61,13 +60,6 @@ export class TextureOptimizer {
 
             // Generate output buffer
             const outputBuffer = await pipeline.toBuffer();
-
-            // Handle encoding if requested
-            let encoded: string | undefined;
-            if (this.settings.encoding === 'base64') {
-                encoded = outputBuffer.toString('base64');
-            }
-            // Note: base122 implementation would go here if needed
 
             // Write optimized texture to disk
             await fs.mkdir(path.dirname(outputPath), { recursive: true });
@@ -88,8 +80,7 @@ export class TextureOptimizer {
                 },
                 reductionPercent,
                 settings: this.settings,
-                processingTime,
-                encoded
+                processingTime
             };
 
         } catch (error) {

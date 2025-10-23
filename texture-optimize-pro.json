@@ -4,8 +4,7 @@
         "format": "png",
         "quality": 80,
         "powerOf2": true,
-        "maintainAspectRatio": true,
-        "encoding": "none"
+        "maintainAspectRatio": true
     },
     "textures": [
         {
