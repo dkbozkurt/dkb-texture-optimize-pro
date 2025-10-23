@@ -135,7 +135,7 @@ program
         console.log(chalk.gray('   - textures: Array of per-texture configurations'));
         console.log(chalk.gray('     - name: Texture filename (without extension)'));
         console.log(chalk.gray('     - useDefault: true = use default settings, false = use custom'));
-        console.log(chalk.gray('     - maxSize: Maximum dimension (64, 128, 256, 512, 1024, 2048, 4096)'));
+        console.log(chalk.gray('     - maxSize: Maximum dimension (32, 64, 128, 256, 512, 1024, 2048, 4096)'));
         console.log(chalk.gray('     - quality: Compression quality (1-100)'));
         console.log(chalk.blue('\n💡 Tips:'));
         console.log(chalk.gray('   - `powerOf2` and `maintainAspectRatio` are now always `true`'));

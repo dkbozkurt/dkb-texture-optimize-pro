@@ -8,7 +8,7 @@ Optimize your game textures with **Sharp** - the fastest Node.js image processin
 
 - ⚡ **Lightning Fast** - Powered by Sharp (libvips) for 4-26x faster processing.
 - 🎯 **Per-Texture Configuration** - Each texture can have custom settings based on filename.
-- 📏 **Automatic Power-of-2** - Automatically resizes to nearest power-of-2 for WebGL compatibility (64, 128, 256, 512, 1024, 2048, 4096).
+- 📏 **Automatic Power-of-2** - Automatically resizes to nearest power-of-2 for WebGL compatibility (32, 64, 128, 256, 512, 1024, 2048, 4096).
 - 📐 **Always Maintains Aspect Ratio** - Never stretches or skews your images.
 - 🖼️ **Preserves Input Format** - Your `.png` files stay `.png`, and `.jpg` stay `.jpg`.
 - 🗜️ **Optimized Compression** - Applies quality settings for PNG, JPG, and WebP.
@@ -63,7 +63,7 @@ Edit `texture-optimize-pro.json` to match your texture filenames:
 
 - **name**: Filename without extension (e.g., "player-sprite" matches "player-sprite.png")
 - **useDefault**: `true` = use default settings, `false` = use custom settings
-- **maxSize**: Maximum dimension (64, 128, 256, 512, 1024, 2048, 4096)
+- **maxSize**: Maximum dimension (32, 64, 128, 256, 512, 1024, 2048, 4096)
 - **quality**: Compression quality (1-100)
 
 **Note:** format, powerOf2, and maintainAspectRatio are now automatic!
@@ -252,7 +252,7 @@ This is the schema for entries in your texture-optimize-pro.json.
 
 ```typescript
 interface TextureSettings {
-  maxSize?: 64 | 128 | 256 | 512 | 1024 | 2048 | 4096;
+  maxSize?: 32 | 64 | 128 | 256 | 512 | 1024 | 2048 | 4096;
   quality?: number; // 1-100
 }
 ```

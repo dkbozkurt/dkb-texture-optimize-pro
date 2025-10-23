@@ -4,14 +4,14 @@ import { z } from 'zod';
 
 // Zod schema for validation
 const textureSettingsSchema = z.object({
-    maxSize: z.union([z.literal(64), z.literal(128), z.literal(256), z.literal(512), z.literal(1024), z.literal(2048), z.literal(4096)]).optional(),
+    maxSize: z.union([z.literal(32), z.literal(64), z.literal(128), z.literal(256), z.literal(512), z.literal(1024), z.literal(2048), z.literal(4096)]).optional(),
     quality: z.number().min(1).max(100).optional(),
 });
 
 const textureEntrySchema = z.object({
     name: z.string(),
     useDefault: z.boolean(),
-    maxSize: z.union([z.literal(64), z.literal(128), z.literal(256), z.literal(512), z.literal(1024), z.literal(2048), z.literal(4096)]).optional(),
+    maxSize: z.union([z.literal(32), z.literal(64), z.literal(128), z.literal(256), z.literal(512), z.literal(1024), z.literal(2048), z.literal(4096)]).optional(),
     quality: z.number().min(1).max(100).optional(),
 });
 

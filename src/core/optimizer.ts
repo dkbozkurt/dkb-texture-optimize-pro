@@ -138,8 +138,8 @@ export class TextureOptimizer {
         }
 
         // Clamp to valid range
-        targetWidth = Math.max(64, Math.min(targetWidth, maxSize));
-        targetHeight = Math.max(64, Math.min(targetHeight, maxSize));
+        targetWidth = Math.max(32, Math.min(targetWidth, maxSize));
+        targetHeight = Math.max(32, Math.min(targetHeight, maxSize));
 
         return { width: targetWidth, height: targetHeight };
     }

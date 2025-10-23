@@ -97,7 +97,7 @@ Edit `texture-optimize-pro.json` to match your texture files:
 
 **maxSize Options:**
 
-- 64, 128, 256, 512, 1024, 2048, 4096
+- 32, 64, 128, 256, 512, 1024, 2048, 4096
 - The optimizer will resize to the nearest lower power-of-2, capped at this maxSize.
 
 ## Step 4: Run the Optimizer
