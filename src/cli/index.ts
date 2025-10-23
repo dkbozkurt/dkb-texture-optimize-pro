@@ -104,27 +104,15 @@ program
             },
             textures: [
                 {
-                    name: 'player-sprite',
-                    useDefault: false,
-                    maxSize: 512,
-                    quality: 85
-                },
-                {
-                    name: 'enemy-goblin',
+                    name: 'text-sprite-custom',
                     useDefault: false,
                     maxSize: 256,
                     quality: 80
                 },
                 {
-                    name: 'background-clouds',
+                    name: 'text-sprite-default',
                     useDefault: true
                 },
-                {
-                    name: 'ui-button',
-                    useDefault: false,
-                    maxSize: 256,
-                    quality: 90
-                }
             ]
         };
 
@@ -141,11 +129,16 @@ program
         console.log(chalk.gray('   - `powerOf2` and `maintainAspectRatio` are now always `true`'));
         console.log(chalk.gray('   - Output format now matches the input format (e.g., .png stays .png)'));
         console.log(chalk.gray('   - Example: "player-sprite.png" matches name "player-sprite"'));
-        console.log(chalk.gray('   - Use maxSize 512 or 256 for playable ads (5MB limit)'));
-        console.log(chalk.gray('   - Use maxSize 1024 for general web games'));
         console.log(chalk.blue('\n🚀 Next steps:'));
         console.log(chalk.gray('   1. Edit texture-optimize-pro.json with your texture names and settings'));
-        console.log(chalk.gray('   2. Run: texture-optimizer build'));
+        console.log(chalk.gray('\n   2. Add the following script to your ' + chalk.bold('package.json') + ':'));
+        console.log(chalk.cyan(`
+  "scripts": {
+    "optimize": "texture-optimizer build --base-path src/assets/textures --output dist/textures"
+  }
+        `));
+        console.log(chalk.gray('\n   3. Run the optimizer:'));
+        console.log(chalk.cyan('      npm run optimize'));
     });
 
 program.parse();
