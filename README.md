@@ -42,7 +42,6 @@ This creates a `texture-optimize-pro.json` file:
     "quality": 80,
     "powerOf2": true,
     "maintainAspectRatio": true,
-    "encoding": "none"
   },
   "textures": [
     {
@@ -124,7 +123,6 @@ const optimizer = new TextureOptimizer({
   quality: 85,
   powerOf2: true,
   maintainAspectRatio: true,
-  encoding: 'none'
 });
 
 const result = await optimizer.optimize(
@@ -256,7 +254,6 @@ interface TextureSettings {
   quality?: number; // 1-100
   powerOf2?: boolean;
   maintainAspectRatio?: boolean;
-  encoding?: 'base64' | 'base122' | 'none';
 }
 ```
 
@@ -271,8 +268,7 @@ Applied to all textures without custom configuration:
     "format": "png",
     "quality": 80,
     "powerOf2": true,
-    "maintainAspectRatio": true,
-    "encoding": "none"
+    "maintainAspectRatio": true
   }
 }
 ```

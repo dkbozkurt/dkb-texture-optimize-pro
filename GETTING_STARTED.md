@@ -48,7 +48,6 @@ Edit `texture-optimize-pro.json` to match your texture files:
     "quality": 80,
     "powerOf2": true,
     "maintainAspectRatio": true,
-    "encoding": "none"
   },
   "textures": [
     {
