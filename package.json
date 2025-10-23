@@ -46,7 +46,7 @@
     "game-development"
   ],
   "author": "Dogukan Kaan Bozkurt",
-  "license": "BSD-3-Clause",
+  "license": "MIT License",
   "repository": {
     "type": "git",
     "url": "https://github.com/dkbozkurt/dkb-texture-optimize-pro"

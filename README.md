@@ -389,7 +389,7 @@ export MALLOC_ARENA_MAX=2
 
 ## 📜 License
 
-BSD-3-Clause © Dogukan Kaan Bozkurt
+MIT License © Dogukan Kaan Bozkurt
 
 ## 🤝 Contributing
 
