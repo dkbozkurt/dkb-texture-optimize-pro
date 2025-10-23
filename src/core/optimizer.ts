@@ -1,7 +1,12 @@
 import sharp from 'sharp'; // Sharp is the main dependency!
 import fs from 'fs/promises';
 import path from 'path';
-import type { TextureSettings } from './texture-config';
+import type { TextureSettings as ConfigSettings } from './texture-config';
+
+// These settings are passed from the BatchProcessor
+export type OptimizerSettings = ConfigSettings & {
+    format: 'png' | 'jpg' | 'webp';
+};
 
 export interface OptimizationResult {
     success: boolean;
@@ -10,7 +15,7 @@ export interface OptimizationResult {
     originalSize: { width: number; height: number; bytes: number };
     optimizedSize: { width: number; height: number; bytes: number };
     reductionPercent: number;
-    settings: TextureSettings;
+    settings: OptimizerSettings; // Use OptimizerSettings
     processingTime: number;
     error?: string;
 }
@@ -20,7 +25,7 @@ export interface OptimizationResult {
  * Handles resizing, compression, and format conversion
  */
 export class TextureOptimizer {
-    constructor(private settings: TextureSettings) { }
+    constructor(private settings: OptimizerSettings) { } // Use OptimizerSettings
 
     /**
      * Optimize a single texture using Sharp
@@ -41,6 +46,7 @@ export class TextureOptimizer {
             };
 
             // Calculate target dimensions based on maxSize setting
+            // powerOf2 is now always true
             const targetDims = this.calculateTargetDimensions(
                 originalSize.width,
                 originalSize.height,
@@ -50,7 +56,7 @@ export class TextureOptimizer {
             // Create Sharp processing pipeline
             let pipeline = sharp(originalBuffer)
                 .resize(targetDims.width, targetDims.height, {
-                    fit: this.settings.maintainAspectRatio ? 'inside' : 'fill',
+                    fit: 'inside', // Hardcoded maintainAspectRatio: true
                     kernel: sharp.kernel.lanczos3, // Best quality resizing algorithm
                     withoutEnlargement: true // Never upscale beyond original
                 });
@@ -107,16 +113,7 @@ export class TextureOptimizer {
         maxSize: number
     ): { width: number; height: number } {
 
-        if (!this.settings.powerOf2) {
-            // Simple max dimension constraint without power-of-2
-            const scale = Math.min(1, maxSize / Math.max(width, height));
-            return {
-                width: Math.round(width * scale),
-                height: Math.round(height * scale)
-            };
-        }
-
-        // Power-of-2 calculation for WebGL compatibility
+        // Power-of-2 calculation is now the default
         const toPowerOf2 = (val: number): number => {
             return Math.pow(2, Math.floor(Math.log2(val)));
         };
@@ -153,8 +150,7 @@ export class TextureOptimizer {
      */
     private applyCompression(pipeline: sharp.Sharp): sharp.Sharp {
         switch (this.settings.format) {
-            case 'jpeg':
-            case 'jpg':
+            case 'jpg': // Handles 'jpeg' via format detection in batch-processor
                 return pipeline.jpeg({
                     quality: this.settings.quality,
                     mozjpeg: true, // Use mozjpeg for better compression

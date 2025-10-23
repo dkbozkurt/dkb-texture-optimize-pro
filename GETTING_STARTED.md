@@ -43,25 +43,20 @@ Edit `texture-optimize-pro.json` to match your texture files:
 ```json
 {
   "defaultSettings": {
-    "maxSize": 1024,
-    "format": "png",
+    "maxSize": 512,
     "quality": 80,
-    "powerOf2": true,
-    "maintainAspectRatio": true,
   },
   "textures": [
     {
       "name": "player-sprite",
       "useDefault": false,
       "maxSize": 512,
-      "format": "webp",
       "quality": 85
     },
     {
       "name": "enemy-goblin",
       "useDefault": false,
       "maxSize": 256,
-      "format": "webp",
       "quality": 80
     },
     {
@@ -85,10 +80,14 @@ Edit `texture-optimize-pro.json` to match your texture files:
   "name": "player-sprite",      // Filename without extension
   "useDefault": false,           // false = use custom settings below
   "maxSize": 512,                // Maximum dimension in pixels
-  "format": "webp",              // Output format
   "quality": 85                  // Compression quality (1-100)
 }
 ```
+**Automatic Settings**
+
+- Format: The output format now always matches the input format (e.g., .png stays .png).
+- Power of 2: Textures are always resized to the nearest power-of-2 dimension.
+- Aspect Ratio: The texture's aspect ratio is always maintained.
 
 **Name Matching:**
 
@@ -99,14 +98,7 @@ Edit `texture-optimize-pro.json` to match your texture files:
 **maxSize Options:**
 
 - 64, 128, 256, 512, 1024, 2048, 4096
-- With `powerOf2: true`, resizes to nearest lower power-of-2
-- With `powerOf2: false`, resizes proportionally
-
-**Format Options:**
-
-- `"png"` - Best for transparency, UI elements
-- `"jpg"` - Best for photos, backgrounds without transparency
-- `"webp"` - Best overall compression for modern browsers
+- The optimizer will resize to the nearest lower power-of-2, capped at this maxSize.
 
 ## Step 4: Run the Optimizer
 
@@ -213,9 +205,7 @@ Ultra-aggressive optimization:
 {
   "defaultSettings": {
     "maxSize": 512,
-    "format": "webp",
     "quality": 70,
-    "powerOf2": true
   },
   "textures": [
     {
@@ -241,8 +231,7 @@ Balance quality and performance:
 ```json
 {
   "defaultSettings": {
-    "maxSize": 1024,
-    "format": "webp",
+    "maxSize": 512,
     "quality": 85,
     "powerOf2": true
   },
@@ -271,8 +260,7 @@ Optimize for GPU memory:
 ```json
 {
   "defaultSettings": {
-    "maxSize": 1024,
-    "format": "png",
+    "maxSize": 512,
     "quality": 85,
     "powerOf2": true
   },
@@ -318,7 +306,7 @@ Bad:
 
 ### 3. Power-of-2 for WebGL
 
-Always use `powerOf2: true` for:
+This is no longer optional and is enabled by default, which is required for:
 
 - ThreeJS textures (required for mipmapping)
 - PixiJS textures (better performance)
@@ -357,7 +345,7 @@ After optimization, load your game and verify:
 
 ### Issue: Output files too large
 
-**Solution:** Decrease `maxSize` or `quality`, or switch format:
+**Solution:** Decrease `maxSize` or `quality`. You may also need to re-export your source asset in a more optimal format (e.g., save a .png background as a .jpg).
 
 ```json
 {
@@ -377,19 +365,6 @@ After optimization, load your game and verify:
 File: player-sprite-idle.png
 Config: "name": "player-sprite-idle"  ✓ Correct
 Config: "name": "player-sprite"       ✗ Won't match
-```
-
-### Issue: Power-of-2 creating odd sizes
-
-**Solution:** Manually specify target size or disable power-of-2:
-
-```json
-{
-  "name": "my-texture",
-  "useDefault": false,
-  "powerOf2": false,
-  "maxSize": 1000
-}
 ```
 
 ## Next Steps

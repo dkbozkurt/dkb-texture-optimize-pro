@@ -5,20 +5,14 @@ import { z } from 'zod';
 // Zod schema for validation
 const textureSettingsSchema = z.object({
     maxSize: z.union([z.literal(64), z.literal(128), z.literal(256), z.literal(512), z.literal(1024), z.literal(2048), z.literal(4096)]).optional(),
-    format: z.enum(['png', 'jpg', 'jpeg', 'webp']).optional(),
     quality: z.number().min(1).max(100).optional(),
-    powerOf2: z.boolean().optional(),
-    maintainAspectRatio: z.boolean().optional(),
 });
 
 const textureEntrySchema = z.object({
     name: z.string(),
     useDefault: z.boolean(),
     maxSize: z.union([z.literal(64), z.literal(128), z.literal(256), z.literal(512), z.literal(1024), z.literal(2048), z.literal(4096)]).optional(),
-    format: z.enum(['png', 'jpg', 'jpeg', 'webp']).optional(),
     quality: z.number().min(1).max(100).optional(),
-    powerOf2: z.boolean().optional(),
-    maintainAspectRatio: z.boolean().optional(),
 });
 
 const textureConfigSchema = z.object({
@@ -87,10 +81,7 @@ export class TextureConfigManager {
         // Merge texture-specific settings with defaults (texture settings override defaults)
         return {
             maxSize: textureEntry.maxSize ?? this.config.defaultSettings.maxSize,
-            format: textureEntry.format ?? this.config.defaultSettings.format,
             quality: textureEntry.quality ?? this.config.defaultSettings.quality,
-            powerOf2: textureEntry.powerOf2 ?? this.config.defaultSettings.powerOf2,
-            maintainAspectRatio: textureEntry.maintainAspectRatio ?? this.config.defaultSettings.maintainAspectRatio,
         };
     }
 

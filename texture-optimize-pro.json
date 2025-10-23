@@ -1,31 +1,25 @@
 {
     "defaultSettings": {
-        "maxSize": 1024,
-        "format": "png",
-        "quality": 80,
-        "powerOf2": true,
-        "maintainAspectRatio": true
+        "maxSize": 512,
+        "quality": 80
     },
     "textures": [
         {
             "name": "player-sprite",
             "useDefault": false,
             "maxSize": 512,
-            "format": "webp",
             "quality": 85
         },
         {
             "name": "enemy-goblin",
             "useDefault": false,
             "maxSize": 256,
-            "format": "webp",
             "quality": 80
         },
         {
             "name": "background-sky",
             "useDefault": false,
             "maxSize": 1024,
-            "format": "jpg",
             "quality": 75
         },
         {
@@ -36,21 +30,18 @@
             "name": "ui-button",
             "useDefault": false,
             "maxSize": 256,
-            "format": "png",
             "quality": 90
         },
         {
             "name": "ui-icon",
             "useDefault": false,
             "maxSize": 128,
-            "format": "png",
             "quality": 85
         },
         {
             "name": "hero-spritesheet",
             "useDefault": false,
             "maxSize": 2048,
-            "format": "png",
             "quality": 90
         }
     ]

@@ -99,25 +99,20 @@ program
 
         const template = {
             defaultSettings: {
-                maxSize: 1024,
-                format: 'png',
-                quality: 80,
-                powerOf2: true,
-                maintainAspectRatio: true
+                maxSize: 512,
+                quality: 80
             },
             textures: [
                 {
                     name: 'player-sprite',
                     useDefault: false,
                     maxSize: 512,
-                    format: 'webp',
                     quality: 85
                 },
                 {
                     name: 'enemy-goblin',
                     useDefault: false,
                     maxSize: 256,
-                    format: 'webp',
                     quality: 80
                 },
                 {
@@ -128,7 +123,6 @@ program
                     name: 'ui-button',
                     useDefault: false,
                     maxSize: 256,
-                    format: 'png',
                     quality: 90
                 }
             ]
@@ -142,14 +136,13 @@ program
         console.log(chalk.gray('     - name: Texture filename (without extension)'));
         console.log(chalk.gray('     - useDefault: true = use default settings, false = use custom'));
         console.log(chalk.gray('     - maxSize: Maximum dimension (64, 128, 256, 512, 1024, 2048, 4096)'));
-        console.log(chalk.gray('     - format: Output format (png, jpg, webp)'));
         console.log(chalk.gray('     - quality: Compression quality (1-100)'));
         console.log(chalk.blue('\n💡 Tips:'));
-        console.log(chalk.gray('   - Texture names match filenames without extension'));
+        console.log(chalk.gray('   - `powerOf2` and `maintainAspectRatio` are now always `true`'));
+        console.log(chalk.gray('   - Output format now matches the input format (e.g., .png stays .png)'));
         console.log(chalk.gray('   - Example: "player-sprite.png" matches name "player-sprite"'));
         console.log(chalk.gray('   - Use maxSize 512 or 256 for playable ads (5MB limit)'));
         console.log(chalk.gray('   - Use maxSize 1024 for general web games'));
-        console.log(chalk.gray('   - WebP format provides best compression for most cases'));
         console.log(chalk.blue('\n🚀 Next steps:'));
         console.log(chalk.gray('   1. Edit texture-optimize-pro.json with your texture names and settings'));
         console.log(chalk.gray('   2. Run: texture-optimizer build'));

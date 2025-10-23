@@ -1,6 +1,6 @@
 import { glob } from 'glob';
 import path from 'path';
-import { TextureOptimizer, type OptimizationResult } from './optimizer';
+import { TextureOptimizer, type OptimizationResult, type OptimizerSettings } from './optimizer';
 import { TextureConfigManager } from './texture-config';
 import chalk from 'chalk';
 
@@ -14,6 +14,10 @@ export interface BatchProcessorOptions {
     verbose?: boolean;
 }
 
+// Supported formats
+const SUPPORTED_FORMATS = ['png', 'jpg', 'jpeg', 'webp'];
+type SupportedFormat = 'png' | 'jpg' | 'webp';
+
 /**
  * BatchProcessor scans directories for textures and processes them
  * based on per-texture configuration from textures.json
@@ -24,7 +28,7 @@ export class BatchProcessor {
 
     constructor(options: BatchProcessorOptions) {
         this.options = {
-            patterns: ['**/*.{png,jpg,jpeg}'],
+            patterns: [`**/*.{${SUPPORTED_FORMATS.join(',')}}`], // Use supported formats
             exclude: ['**/node_modules/**'],
             concurrency: 10,
             verbose: false,
@@ -78,16 +82,29 @@ export class BatchProcessor {
         // Example: "player-sprite.png" matches config entry with name "player-sprite"
         const settings = this.configManager.getSettingsForTexture(inputPath);
 
-        // Determine output path
+        // Auto-detect format from input file extension
+        let ext = path.extname(inputPath).substring(1).toLowerCase();
+        if (ext === 'jpeg') {
+            ext = 'jpg';
+        }
+        const format = ext as SupportedFormat;
+
+        // Combine config settings with auto-detected format
+        const optimizerSettings: OptimizerSettings = {
+            ...settings,
+            format: format,
+            // Set defaults for quality and maxSize if not provided
+            quality: settings.quality ?? 80,
+            maxSize: settings.maxSize ?? 512, // Default maxSize is now 512
+        };
+
+        // Determine output path (keeps original extension)
         const relativePath = path.relative(this.options.basePath, inputPath);
-        const outputName = path.basename(relativePath).replace(
-            /\.(png|jpe?g)$/i,
-            `.${settings.format}`
-        );
+        const outputName = path.basename(relativePath);
         const outputPath = path.join(this.options.outputDir, path.dirname(relativePath), outputName);
 
         // Create optimizer with texture-specific settings
-        const optimizer = new TextureOptimizer(settings);
+        const optimizer = new TextureOptimizer(optimizerSettings);
 
         // Process using Sharp
         const result = await optimizer.optimize(inputPath, outputPath);
@@ -101,7 +118,7 @@ export class BatchProcessor {
 
             console.log(
                 `${chalk.green('✓')} ${configType} ${path.basename(inputPath)} → ${outputName} ` +
-                `(${reduction}% smaller, ${sizeMB} MB, ${result.optimizedSize.width}x${result.optimizedSize.height}, maxSize: ${settings.maxSize}px)`
+                `(${reduction}% smaller, ${sizeMB} MB, ${result.optimizedSize.width}x${result.optimizedSize.height}, maxSize: ${optimizerSettings.maxSize}px)`
             );
         } else {
             console.log(`${chalk.red('✗')} ${path.basename(inputPath)} - ${result.error}`);
@@ -152,9 +169,18 @@ export class BatchProcessor {
         // Calculate statistics
         const totalOriginalBytes = successful.reduce((sum, r) => sum + r.originalSize.bytes, 0);
         const totalOptimizedBytes = successful.reduce((sum, r) => sum + r.optimizedSize.bytes, 0);
-        const totalReduction = ((totalOriginalBytes - totalOptimizedBytes) / totalOriginalBytes) * 100;
+
+        // Avoid division by zero if totalOriginalBytes is 0
+        const totalReduction = totalOriginalBytes > 0
+            ? ((totalOriginalBytes - totalOptimizedBytes) / totalOriginalBytes) * 100
+            : 0;
+
         const savedMB = (totalOriginalBytes - totalOptimizedBytes) / 1024 / 1024;
-        const avgProcessingTime = successful.reduce((sum, r) => sum + r.processingTime, 0) / successful.length;
+
+        // Avoid division by zero if successful.length is 0
+        const avgProcessingTime = successful.length > 0
+            ? successful.reduce((sum, r) => sum + r.processingTime, 0) / successful.length
+            : 0;
 
         console.log(chalk.bold('\n📊 Size Statistics:'));
         console.log(chalk.blue(`   Original size:  ${(totalOriginalBytes / 1024 / 1024).toFixed(2)} MB`));

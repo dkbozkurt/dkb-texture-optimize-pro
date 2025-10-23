@@ -6,13 +6,15 @@ Optimize your game textures with **Sharp** - the fastest Node.js image processin
 
 ## ✨ Features
 
-- ⚡ **Lightning Fast** - Powered by Sharp (libvips) for 4-26x faster processing
-- 🎯 **Per-Texture Configuration** - Each texture can have custom settings based on filename
-- 📏 **Power-of-2 Resizing** - WebGL-optimized dimensions (64, 128, 256, 512, 1024, 2048, 4096)
-- 🗜️ **Smart Compression** - PNG, JPG, and WebP with quality control
-- 📦 **Batch Processing** - Process entire directories with configurable concurrency
-- 🎮 **Game-Optimized** - Built for PixiJS, ThreeJS, and playable ads
-- 🔧 **TypeScript** - Full type safety and IntelliSense support
+- ⚡ **Lightning Fast** - Powered by Sharp (libvips) for 4-26x faster processing.
+- 🎯 **Per-Texture Configuration** - Each texture can have custom settings based on filename.
+- 📏 **Automatic Power-of-2** - Automatically resizes to nearest power-of-2 for WebGL compatibility (64, 128, 256, 512, 1024, 2048, 4096).
+- 📐 **Always Maintains Aspect Ratio** - Never stretches or skews your images.
+- 🖼️ **Preserves Input Format** - Your `.png` files stay `.png`, and `.jpg` stay `.jpg`.
+- 🗜️ **Optimized Compression** - Applies quality settings for PNG, JPG, and WebP.
+- 📦 **Batch Processing** - Process entire directories with configurable concurrency.
+- 🎮 **Game-Optimized** - Built for PixiJS, ThreeJS, and playable ads.
+- 🔧 **TypeScript** - Full type safety and IntelliSense support.
 
 ## 📦 Installation
 
@@ -37,18 +39,14 @@ This creates a `texture-optimize-pro.json` file:
 ```json
 {
   "defaultSettings": {
-    "maxSize": 1024,
-    "format": "png",
+    "maxSize": 512,
     "quality": 80,
-    "powerOf2": true,
-    "maintainAspectRatio": true,
   },
   "textures": [
     {
       "name": "player-sprite",
       "useDefault": false,
-      "maxSize": 512,
-      "format": "webp",
+      "maxSize": 1024,
       "quality": 85
     },
     {
@@ -66,8 +64,13 @@ Edit `texture-optimize-pro.json` to match your texture filenames:
 - **name**: Filename without extension (e.g., "player-sprite" matches "player-sprite.png")
 - **useDefault**: `true` = use default settings, `false` = use custom settings
 - **maxSize**: Maximum dimension (64, 128, 256, 512, 1024, 2048, 4096)
-- **format**: Output format ("png", "jpg", "webp")
 - **quality**: Compression quality (1-100)
+
+**Note:** format, powerOf2, and maintainAspectRatio are now automatic!
+
+- Output format matches the input format.
+- Power-of-2 resizing is always enabled.
+- Aspect ratio is always maintained.
 
 ### 3. Process Your Textures
 
@@ -117,17 +120,16 @@ Creates a sample `texture-optimize-pro.json` configuration file in the specified
 ```typescript
 import { TextureOptimizer } from 'dkb-texture-optimize-pro';
 
+// Settings for a single run, including the detected format
 const optimizer = new TextureOptimizer({
   maxSize: 512,
-  format: 'webp',
   quality: 85,
-  powerOf2: true,
-  maintainAspectRatio: true,
+  format: 'png' // Format must be specified here
 });
 
 const result = await optimizer.optimize(
   'src/player-sprite.png',
-  'dist/player-sprite.webp'
+  'dist/player-sprite.png' // Output matches input format
 );
 
 console.log(`Reduced by ${result.reductionPercent.toFixed(1)}%`);
@@ -147,6 +149,7 @@ const processor = new BatchProcessor({
   verbose: true
 });
 
+// BatchProcessor handles format detection automatically
 const results = await processor.processAll();
 
 console.log(`Processed ${results.length} textures`);
@@ -164,7 +167,6 @@ const configManager = await TextureConfigManager.loadFromFile('texture-optimize-
 // Get settings for a specific texture
 const settings = configManager.getSettingsForTexture('player-sprite.png');
 console.log(`Max size: ${settings.maxSize}px`);
-console.log(`Format: ${settings.format}`);
 console.log(`Quality: ${settings.quality}`);
 
 // Check if texture has custom settings
@@ -186,18 +188,16 @@ Aggressive optimization is key for playable ads:
 {
   "defaultSettings": {
     "maxSize": 512,
-    "format": "webp",
-    "quality": 75,
-    "powerOf2": true
+    "quality": 75
   }
 }
 ```
 
 **Tips:**
 - Use maxSize 256-512 for most textures
-- WebP format provides best compression
 - Quality 70-80 for good balance
 - Combine with texture atlases for maximum savings
+- Choose your input formats wisely (e.g., use .jpg for backgrounds, .png for UI).
 
 ### For PixiJS Games
 
@@ -206,10 +206,8 @@ Balance quality and performance:
 ```json
 {
   "defaultSettings": {
-    "maxSize": 1024,
-    "format": "webp",
+    "maxSize": 512,
     "quality": 85,
-    "powerOf2": true
   },
   "textures": [
     {
@@ -230,30 +228,32 @@ Optimize for GPU memory:
 {
   "defaultSettings": {
     "maxSize": 1024,
-    "format": "png",
     "quality": 85,
-    "powerOf2": true
-  }
+  },"textures": [
+    {
+        "name": "hero-diffuse-map",
+        "useDefault": false,
+        "maxSize": 1024,
+        "quality": 80
+    }
+  ]
 }
 ```
 
 **Tips:**
-- Power-of-2 is critical for ThreeJS mipmapping
+- Power-of-2 is automatic, which is critical for ThreeJS mipmapping.
 - Use PNG for textures requiring alpha channel
 - JPG for diffuse maps without transparency
-- WebP for modern browser optimization
 
 ## 🔧 Configuration Reference
 
 ### TextureSettings
+This is the schema for entries in your texture-optimize-pro.json.
 
 ```typescript
 interface TextureSettings {
   maxSize?: 64 | 128 | 256 | 512 | 1024 | 2048 | 4096;
-  format?: 'png' | 'jpg' | 'jpeg' | 'webp';
   quality?: number; // 1-100
-  powerOf2?: boolean;
-  maintainAspectRatio?: boolean;
 }
 ```
 
@@ -264,11 +264,8 @@ Applied to all textures without custom configuration:
 ```json
 {
   "defaultSettings": {
-    "maxSize": 1024,
-    "format": "png",
+    "maxSize": 512,
     "quality": 80,
-    "powerOf2": true,
-    "maintainAspectRatio": true
   }
 }
 ```
@@ -284,7 +281,6 @@ Override defaults for specific textures:
       "name": "texture-name-without-extension",
       "useDefault": false,
       "maxSize": 512,
-      "format": "webp",
       "quality": 85
     }
   ]
