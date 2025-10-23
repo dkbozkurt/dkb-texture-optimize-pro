@@ -1,0 +1,25 @@
+{
+  "name": "dkb-texture-optimize-pro",
+  "version": "1.0.0",
+  "description": "Textures often take most of the build size due to the specifics of the data they hold: big arrays of pixels. Luckily enough, dkb-texture-optimize-pro targets HTML5 platform, which provides a handful of formats available with no additional effort.",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dkbozkurt/dkb-texture-optimize-pro.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dkbozkurt/dkb-texture-optimize-pro/issues"
+  },
+  "homepage": "https://github.com/dkbozkurt/dkb-texture-optimize-pro#readme",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
