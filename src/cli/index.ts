@@ -111,16 +111,16 @@ program
                 quality: 80
             },
             textures: [
-                // {
-                //     name: 'text-sprite-custom',
-                //     useDefault: false,
-                //     maxSize: 256,
-                //     quality: 80
-                // },
-                // {
-                //     name: 'text-sprite-default',
-                //     useDefault: true
-                // },
+                {
+                    name: 'text-sprite-custom',
+                    useDefault: false,
+                    maxSize: 256,
+                    quality: 80
+                },
+                {
+                    name: 'text-sprite-default',
+                    useDefault: true
+                },
             ]
         };
 
