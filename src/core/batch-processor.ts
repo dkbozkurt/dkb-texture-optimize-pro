@@ -102,13 +102,27 @@ export class BatchProcessor {
             maxSize: settings.maxSize ?? 512,
         };
 
+        // Check if inputPath is from _originalTexture folder
+        const isFromBackupFolder = inputPath.includes('_originalTexture');
+
         // Determine source, output path, and backup path based on mode
         let sourcePath: string;
         let outputPath: string;
         let backupPath: string | undefined;
         let isReoptimization = false;
 
-        if (this.options.inPlaceMode) {
+        if (isFromBackupFolder) {
+            // File is from _originalTexture, output to parent directory
+            sourcePath = inputPath;
+            const parentDir = path.dirname(path.dirname(inputPath)); // Go up two levels
+            const filename = path.basename(inputPath);
+            outputPath = path.join(parentDir, filename);
+            isReoptimization = true;
+
+            if (this.options.verbose) {
+                console.log(chalk.gray(`   📦 Using texture from _originalTexture folder: ${filename}`));
+            }
+        } else if (this.options.inPlaceMode) {
             const inputDir = path.dirname(inputPath);
             const inputFilename = path.basename(inputPath);
             const backupDir = path.join(inputDir, '_originalTexture');
@@ -208,8 +222,8 @@ export class BatchProcessor {
     }
 
     /**
-     * Find all texture files matching patterns in the base path
-     */
+ * Find all texture files matching patterns in the base path
+ */
     private async findTextures(): Promise<string[]> {
         const allFiles: string[] = [];
 
@@ -223,6 +237,26 @@ export class BatchProcessor {
         }
 
         // Remove duplicates and sort
+        const uniqueFiles = [...new Set(allFiles)].sort();
+
+        // If no files found, check if there are files in _originalTexture folders
+        if (uniqueFiles.length === 0) {
+            console.log(chalk.yellow('⚠️  No textures found outside _originalTexture folders'));
+            console.log(chalk.blue('🔍 Searching for textures in _originalTexture folders...'));
+
+            for (const pattern of this.options.patterns) {
+                const backupFiles = await glob(`**/_originalTexture/${pattern}`, {
+                    cwd: this.options.basePath,
+                    absolute: true
+                });
+                allFiles.push(...backupFiles);
+            }
+
+            if (allFiles.length > 0) {
+                console.log(chalk.green(`✓ Found ${allFiles.length} textures in _originalTexture folders\n`));
+            }
+        }
+
         return [...new Set(allFiles)].sort();
     }
 
