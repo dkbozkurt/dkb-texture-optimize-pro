@@ -1,8 +1,8 @@
 {
   "name": "dkb-texture-optimize-pro",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "type": "module",
-  "description": "Texture optimization library for HTML5 games (PixiJS/ThreeJS) with per-texture configuration using Sharp",
+  "description": "Texture optimization library for HTML5 games (PixiJS/ThreeJS) with per-texture configuration and in-place optimization using Sharp",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",

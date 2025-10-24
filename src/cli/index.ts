@@ -23,7 +23,7 @@ program
     .description('Process and optimize textures based on texture-optimize-pro.json configuration')
     .option('-c, --config <path>', 'Path to texture-optimize-pro.json config file', 'texture-optimize-pro.json')
     .option('-b, --base-path <path>', 'Base path for input textures', 'src/assets/textures')
-    .option('-o, --output <path>', 'Output directory', 'dist/textures')
+    .option('-o, --output <path>', 'Output directory (if not specified, optimizes in-place and backs up originals to _originalTexture folder)')
     .option('--concurrency <number>', 'Number of concurrent operations', '10')
     .option('--verbose', 'Verbose logging', false)
     .action(async (options) => {
@@ -33,7 +33,8 @@ program
             // Resolve paths
             const configPath = path.resolve(options.config);
             const basePath = path.resolve(options.basePath);
-            const outputPath = path.resolve(options.output);
+            const outputPath = options.output ? path.resolve(options.output) : undefined;
+            const inPlaceMode = !outputPath;
 
             // Check if config exists
             try {
@@ -54,7 +55,13 @@ program
 
             console.log(chalk.gray(`Config: ${configPath}`));
             console.log(chalk.gray(`Input:  ${basePath}`));
-            console.log(chalk.gray(`Output: ${outputPath}\n`));
+            
+            if (inPlaceMode) {
+                console.log(chalk.yellow(`Mode:   In-place optimization (originals → _originalTexture)`));
+            } else {
+                console.log(chalk.gray(`Output: ${outputPath}`));
+            }
+            console.log();
 
             // Create batch processor
             const processor = new BatchProcessor({
@@ -62,7 +69,8 @@ program
                 outputDir: outputPath,
                 textureConfigPath: configPath,
                 concurrency: parseInt(options.concurrency),
-                verbose: options.verbose
+                verbose: options.verbose,
+                inPlaceMode
             });
 
             // Process all textures
@@ -103,16 +111,16 @@ program
                 quality: 80
             },
             textures: [
-                {
-                    name: 'text-sprite-custom',
-                    useDefault: false,
-                    maxSize: 256,
-                    quality: 80
-                },
-                {
-                    name: 'text-sprite-default',
-                    useDefault: true
-                },
+                // {
+                //     name: 'text-sprite-custom',
+                //     useDefault: false,
+                //     maxSize: 256,
+                //     quality: 80
+                // },
+                // {
+                //     name: 'text-sprite-default',
+                //     useDefault: true
+                // },
             ]
         };
 
@@ -134,11 +142,13 @@ program
         console.log(chalk.gray('\n   2. Add the following script to your ' + chalk.bold('package.json') + ':'));
         console.log(chalk.cyan(`
   "scripts": {
-    "optimize": "texture-optimizer build --base-path src/assets/textures --output dist/textures"
+    "optimize": "texture-optimizer build --base-path src/assets/textures --output dist/textures",
+    "optimize-inplace": "texture-optimizer build --base-path src/assets/textures"
   }
         `));
         console.log(chalk.gray('\n   3. Run the optimizer:'));
-        console.log(chalk.cyan('      npm run optimize'));
+        console.log(chalk.cyan('      npm run optimize          # Output to dist/textures'));
+        console.log(chalk.cyan('      npm run optimize-inplace  # Optimize in-place with backup'));
     });
 
 program.parse();

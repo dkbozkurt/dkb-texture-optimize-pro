@@ -3,15 +3,17 @@ import path from 'path';
 import { TextureOptimizer, type OptimizationResult, type OptimizerSettings } from './optimizer';
 import { TextureConfigManager } from './texture-config';
 import chalk from 'chalk';
+import fs from 'fs/promises';
 
 export interface BatchProcessorOptions {
     basePath: string;
-    outputDir: string;
+    outputDir?: string;
     textureConfigPath: string; // Path to texture-optimize-pro.json
     patterns?: string[];
     exclude?: string[];
     concurrency?: number;
     verbose?: boolean;
+    inPlaceMode?: boolean; // New option for in-place optimization
 }
 
 // Supported formats
@@ -24,14 +26,18 @@ type SupportedFormat = 'png' | 'jpg' | 'webp';
  */
 export class BatchProcessor {
     private configManager!: TextureConfigManager;
-    private options: Required<BatchProcessorOptions>;
+    private options: Required<Omit<BatchProcessorOptions, 'outputDir' | 'inPlaceMode'>> & { 
+        outputDir?: string;
+        inPlaceMode: boolean;
+    };
 
     constructor(options: BatchProcessorOptions) {
         this.options = {
             patterns: [`**/*.{${SUPPORTED_FORMATS.join(',')}}`], // Use supported formats
-            exclude: ['**/node_modules/**'],
+            exclude: ['**/node_modules/**', '**/_originalTexture/**'], // Exclude backup folder
             concurrency: 10,
             verbose: false,
+            inPlaceMode: !options.outputDir,
             ...options
         };
     }
@@ -98,33 +104,78 @@ export class BatchProcessor {
             maxSize: settings.maxSize ?? 512, // Default maxSize is now 512
         };
 
-        // Determine output path (keeps original extension)
-        const relativePath = path.relative(this.options.basePath, inputPath);
-        const outputName = path.basename(relativePath);
-        const outputPath = path.join(this.options.outputDir, path.dirname(relativePath), outputName);
+        // Determine output path based on mode
+        let outputPath: string;
+        let backupPath: string | undefined;
+
+        if (this.options.inPlaceMode) {
+            // In-place mode: optimize in the same location, backup original
+            const inputDir = path.dirname(inputPath);
+            const inputFilename = path.basename(inputPath);
+            const backupDir = path.join(inputDir, '_originalTexture');
+            
+            backupPath = path.join(backupDir, inputFilename);
+            outputPath = inputPath; // Will be replaced with optimized version
+        } else {
+            // Normal mode: output to specified directory
+            const relativePath = path.relative(this.options.basePath, inputPath);
+            const outputName = path.basename(relativePath);
+            outputPath = path.join(this.options.outputDir!, path.dirname(relativePath), outputName);
+        }
 
         // Create optimizer with texture-specific settings
         const optimizer = new TextureOptimizer(optimizerSettings);
 
-        // Process using Sharp
-        const result = await optimizer.optimize(inputPath, outputPath);
+        try {
+            // Process using Sharp
+            const result = await optimizer.optimize(inputPath, outputPath);
 
-        // Log result with color coding
-        if (result.success) {
-            const hasCustom = this.configManager.hasCustomSettings(inputPath);
-            const configType = hasCustom ? chalk.yellow('[CUSTOM]') : chalk.gray('[DEFAULT]');
-            const reduction = result.reductionPercent.toFixed(1);
-            const sizeMB = (result.optimizedSize.bytes / 1024 / 1024).toFixed(2);
+            // If in-place mode and successful, move original to backup
+            if (this.options.inPlaceMode && result.success && backupPath) {
+                await this.backupOriginal(inputPath, backupPath);
+            }
 
-            console.log(
-                `${chalk.green('✓')} ${configType} ${path.basename(inputPath)} → ${outputName} ` +
-                `(${reduction}% smaller, ${sizeMB} MB, ${result.optimizedSize.width}x${result.optimizedSize.height}, maxSize: ${optimizerSettings.maxSize}px)`
-            );
-        } else {
-            console.log(`${chalk.red('✗')} ${path.basename(inputPath)} - ${result.error}`);
+            // Log result with color coding
+            if (result.success) {
+                const hasCustom = this.configManager.hasCustomSettings(inputPath);
+                const configType = hasCustom ? chalk.yellow('[CUSTOM]') : chalk.gray('[DEFAULT]');
+                const reduction = result.reductionPercent.toFixed(1);
+                const sizeMB = (result.optimizedSize.bytes / 1024 / 1024).toFixed(2);
+                const mode = this.options.inPlaceMode ? chalk.cyan('[IN-PLACE]') : '';
+
+                console.log(
+                    `${chalk.green('✓')} ${mode} ${configType} ${path.basename(inputPath)} → ${path.basename(outputPath)} ` +
+                    `(${reduction}% smaller, ${sizeMB} MB, ${result.optimizedSize.width}x${result.optimizedSize.height}, maxSize: ${optimizerSettings.maxSize}px)`
+                );
+            } else {
+                console.log(`${chalk.red('✗')} ${path.basename(inputPath)} - ${result.error}`);
+            }
+
+            return result;
+        } catch (error) {
+            console.log(`${chalk.red('✗')} ${path.basename(inputPath)} - ${(error as Error).message}`);
+            throw error;
         }
+    }
 
-        return result;
+    /**
+     * Backup original texture to _originalTexture folder
+     */
+    private async backupOriginal(originalPath: string, backupPath: string): Promise<void> {
+        try {
+            // Create backup directory if it doesn't exist
+            await fs.mkdir(path.dirname(backupPath), { recursive: true });
+            
+            // Copy original to backup location
+            await fs.copyFile(originalPath, backupPath);
+            
+            if (this.options.verbose) {
+                console.log(chalk.gray(`   📦 Backed up: ${path.basename(originalPath)} → _originalTexture/`));
+            }
+        } catch (error) {
+            console.error(chalk.red(`   ⚠️  Failed to backup ${path.basename(originalPath)}: ${(error as Error).message}`));
+            throw error;
+        }
     }
 
     /**
@@ -161,6 +212,10 @@ export class BatchProcessor {
         console.log(chalk.green(`✓ Successful: ${successful.length}/${results.length}`));
         console.log(chalk.yellow(`⚙ Custom settings applied: ${withCustomSettings.length}`));
         console.log(chalk.gray(`📋 Default settings used: ${successful.length - withCustomSettings.length}`));
+
+        if (this.options.inPlaceMode) {
+            console.log(chalk.cyan(`📦 Originals backed up to: _originalTexture/ folders`));
+        }
 
         if (failed.length > 0) {
             console.log(chalk.red(`✗ Failed: ${failed.length}`));
