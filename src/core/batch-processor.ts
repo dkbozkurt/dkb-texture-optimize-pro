@@ -26,7 +26,7 @@ type SupportedFormat = 'png' | 'jpg' | 'webp';
  */
 export class BatchProcessor {
     private configManager!: TextureConfigManager;
-    private options: Required<Omit<BatchProcessorOptions, 'outputDir' | 'inPlaceMode'>> & { 
+    private options: Required<Omit<BatchProcessorOptions, 'outputDir' | 'inPlaceMode'>> & {
         outputDir?: string;
         inPlaceMode: boolean;
     };
@@ -80,12 +80,11 @@ export class BatchProcessor {
     }
 
     /**
-     * Process a single texture based on its name configuration
-     * The texture name is matched against entries in texture-optimize-pro.json
-     */
+ * Process a single texture based on its name configuration
+ * The texture name is matched against entries in texture-optimize-pro.json
+ */
     private async processTexture(inputPath: string): Promise<OptimizationResult> {
         // Get settings for this specific texture by matching its filename
-        // Example: "player-sprite.png" matches config entry with name "player-sprite"
         const settings = this.configManager.getSettingsForTexture(inputPath);
 
         // Auto-detect format from input file extension
@@ -99,41 +98,70 @@ export class BatchProcessor {
         const optimizerSettings: OptimizerSettings = {
             ...settings,
             format: format,
-            // Set defaults for quality and maxSize if not provided
             quality: settings.quality ?? 80,
-            maxSize: settings.maxSize ?? 512, // Default maxSize is now 512
+            maxSize: settings.maxSize ?? 512,
         };
 
-        // Determine output path based on mode
+        // Determine source, output path, and backup path based on mode
+        let sourcePath: string;
         let outputPath: string;
         let backupPath: string | undefined;
+        let isReoptimization = false;
 
         if (this.options.inPlaceMode) {
-            // In-place mode: optimize in the same location, backup original
             const inputDir = path.dirname(inputPath);
             const inputFilename = path.basename(inputPath);
             const backupDir = path.join(inputDir, '_originalTexture');
-            
+
             backupPath = path.join(backupDir, inputFilename);
-            outputPath = inputPath; // Will be replaced with optimized version
+            outputPath = inputPath;
+
+            // Check if backup already exists
+            try {
+                await fs.access(backupPath);
+                // Backup exists, use it as source (re-optimization scenario)
+                sourcePath = backupPath;
+                isReoptimization = true;
+
+                if (this.options.verbose) {
+                    console.log(chalk.gray(`   📦 Using original from backup: ${path.basename(backupPath)}`));
+                }
+            } catch {
+                // Backup doesn't exist - BACKUP FIRST, then use current as source
+                sourcePath = inputPath;
+                // Create backup BEFORE optimization
+                await this.backupOriginal(inputPath, backupPath);
+            }
         } else {
             // Normal mode: output to specified directory
             const relativePath = path.relative(this.options.basePath, inputPath);
             const outputName = path.basename(relativePath);
             outputPath = path.join(this.options.outputDir!, path.dirname(relativePath), outputName);
+
+            // Check if there's a backup in the source location
+            const inputDir = path.dirname(inputPath);
+            const inputFilename = path.basename(inputPath);
+            const potentialBackupPath = path.join(inputDir, '_originalTexture', inputFilename);
+
+            try {
+                await fs.access(potentialBackupPath);
+                sourcePath = potentialBackupPath;
+                isReoptimization = true;
+
+                if (this.options.verbose) {
+                    console.log(chalk.gray(`   📦 Using original from backup: ${path.basename(potentialBackupPath)}`));
+                }
+            } catch {
+                sourcePath = inputPath;
+            }
         }
 
         // Create optimizer with texture-specific settings
         const optimizer = new TextureOptimizer(optimizerSettings);
 
         try {
-            // Process using Sharp
-            const result = await optimizer.optimize(inputPath, outputPath);
-
-            // If in-place mode and successful, move original to backup
-            if (this.options.inPlaceMode && result.success && backupPath) {
-                await this.backupOriginal(inputPath, backupPath);
-            }
+            // Process using Sharp (from sourcePath, not inputPath)
+            const result = await optimizer.optimize(sourcePath, outputPath);
 
             // Log result with color coding
             if (result.success) {
@@ -142,9 +170,10 @@ export class BatchProcessor {
                 const reduction = result.reductionPercent.toFixed(1);
                 const sizeMB = (result.optimizedSize.bytes / 1024 / 1024).toFixed(2);
                 const mode = this.options.inPlaceMode ? chalk.cyan('[IN-PLACE]') : '';
+                const reoptimizationTag = isReoptimization ? chalk.magenta('[RE-OPT]') : '';
 
                 console.log(
-                    `${chalk.green('✓')} ${mode} ${configType} ${path.basename(inputPath)} → ${path.basename(outputPath)} ` +
+                    `${chalk.green('✓')} ${mode} ${reoptimizationTag} ${configType} ${path.basename(inputPath)} → ${path.basename(outputPath)} ` +
                     `(${reduction}% smaller, ${sizeMB} MB, ${result.optimizedSize.width}x${result.optimizedSize.height}, maxSize: ${optimizerSettings.maxSize}px)`
                 );
             } else {
@@ -165,10 +194,10 @@ export class BatchProcessor {
         try {
             // Create backup directory if it doesn't exist
             await fs.mkdir(path.dirname(backupPath), { recursive: true });
-            
+
             // Copy original to backup location
             await fs.copyFile(originalPath, backupPath);
-            
+
             if (this.options.verbose) {
                 console.log(chalk.gray(`   📦 Backed up: ${path.basename(originalPath)} → _originalTexture/`));
             }
